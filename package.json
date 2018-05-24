@@ -1,0 +1,45 @@
+{
+  "name": "@dbvis/vd-tooltip",
+  "version": "0.0.1",
+  "description": "A simple tooltip based on tether",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "scripts": {
+    "start": "webpack-dev-server --mode development --open",
+    "test": "cross-env TS_NODE_COMPILER_OPTIONS='{\\\"module\\\":\\\"commonjs\\\"}' mocha -r ts-node/register -r ignore-styles -r jsdom-global/register src/**/*.spec.ts",
+    "fixlint": "tslint -p ./ --fix",
+    "lint": "tslint -p ./"
+  },
+  "author": "Wolfgang Jentner <wolfgang.jentner@uni.kn>",
+  "license": "MIT",
+  "dependencies": {
+    "@types/tether": "^1.4.3",
+    "tether": "^1.4.4"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.3",
+    "@types/mocha": "^5.2.0",
+    "chai": "^4.1.2",
+    "chai-dom": "^1.8.0",
+    "clean-webpack-plugin": "^0.1.19",
+    "cross-env": "^5.1.6",
+    "css-loader": "^0.28.11",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.0.6",
+    "ignore-styles": "^5.0.1",
+    "jsdom": "^11.11.0",
+    "jsdom-global": "^3.0.2",
+    "less": "^3.0.1",
+    "less-loader": "^4.1.0",
+    "mocha": "^5.2.0",
+    "style-loader": "^0.20.3",
+    "ts-loader": "^4.0.1",
+    "ts-node": "^6.0.3",
+    "tslint": "^5.10.0",
+    "tslint-loader": "^3.6.0",
+    "typescript": "^2.8.3",
+    "webpack": "^4.8.3",
+    "webpack-cli": "^2.1.4",
+    "webpack-dev-server": "^3.1.1"
+  }
+}
