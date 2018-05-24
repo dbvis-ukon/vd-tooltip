@@ -10,6 +10,10 @@
     "fixlint": "tslint -p ./ --fix",
     "lint": "tslint -p ./"
   },
+  "repository" : { 
+    "type" : "git", 
+    "url" : "git@github.com:dbvis-ukon/vd-tooltip.git"
+  },
   "author": "Wolfgang Jentner <wolfgang.jentner@uni.kn>",
   "license": "MIT",
   "dependencies": {
