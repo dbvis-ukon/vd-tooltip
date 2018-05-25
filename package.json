@@ -62,8 +62,10 @@
     "src/**/*.{ts,tsx}": [
       "npm run prettier:ts -- --write",
       "npm run ts:lint:fix",
-      "npm run less:lint:fix",
       "git add"
+    ],
+    "src/**/*.{less}": [
+      "npm run less:lint:fix"
     ]
   },
   "jest": {
