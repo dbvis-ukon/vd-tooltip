@@ -13,7 +13,7 @@ const packageName = normalizePackageName(packageJSON.name)
 
 const LIB_NAME = pascalCase(packageName)
 const PATHS = {
-  entryPoint: resolve(__dirname, 'src/index.ts'),
+  entryPoint: resolve(__dirname, 'src/public_api.ts'),
   umd: resolve(__dirname, 'umd'),
   fesm: resolve(__dirname, 'lib-fesm'),
 }
@@ -128,7 +128,7 @@ const config = (env = DEFAULT_ENV) => {
 
   const FESMconfig = Object.assign({}, UMDConfig, {
     entry: {
-      [ifProd('index.min', 'index')]: [PATHS.entryPoint],
+      [ifProd('public_api.min', 'public_api')]: [PATHS.entryPoint],
     },
     output: {
       path: PATHS.fesm,

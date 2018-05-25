@@ -24,7 +24,7 @@
     "stripInternal": true
   },
   "include": [
-    "./src/public_api.ts"
+    "./src"
   ],
   "exclude": [
     "node_modules"
