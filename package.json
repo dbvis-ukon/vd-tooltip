@@ -2,7 +2,7 @@
   "name": "@dbvis/vd-tooltip",
   "version": "0.0.1",
   "description": "A simple tooltip based on tether",
-  "main": "umd/typescript-lib-starter.js",
+  "main": "dist/vd-tooltip.js",
   "module": "lib/public_api.js",
   "es2015": "lib-esm/public_api.js",
   "types": "@types/public_api.d.ts",
@@ -16,9 +16,9 @@
     "node": ">=6.9"
   },
   "scripts": {
-    "cleanup": "shx rm -rf umd lib lib-esm lib-fesm @types coverage docs",
+    "cleanup": "shx rm -rf dist lib lib-esm lib-fesm @types coverage docs",
     "prebuild": "npm run cleanup && npm run verify",
-    "build": " tsc && tsc --target es2017 --outDir lib-esm && webpack && webpack --env.prod",
+    "build": " tsc && tsc --target es2017 --outDir lib-esm && webpack && webpack --env.prod && copyfiles -f \"./dist/**/*.html\" \"./dist/**/*.css\" \"./dist/**/*.css.map\" ./lib/ && copyfiles -f \"./dist/**/*.html\" \"./dist/**/*.css\" \"./dist/**/*.css.map\" ./lib-esm/",
     "build:fesm:min": "uglifyjs lib-fesm/public_api.js --compress --mangle --source-map --output lib-fesm/public_api.min.js",
     "docs": "typedoc -p . --theme minimal --target 'es6' --excludeNotExported --excludePrivate --ignoreCompilerErrors --exclude \"**/src/**/__tests__/*.*\" --out docs src/",
     "test": "jest",
@@ -85,7 +85,7 @@
       "<rootDir>/node_modules/",
       "<rootDir>/lib/",
       "<rootDir>/lib-esm/",
-      "<rootDir>/umd/",
+      "<rootDir>/dist/",
       "<rootDir>/src/.*(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$"
     ],
     "coverageThreshold": {
@@ -108,6 +108,7 @@
     "autolesshint": "0.2.1",
     "awesome-typescript-loader": "^4.0.0",
     "commitizen": "^2.9.6",
+    "copyfiles": "2.0.0",
     "cross-var": "^1.1.0",
     "css-loader": "0.28.11",
     "cz-conventional-changelog": "^2.0.0",

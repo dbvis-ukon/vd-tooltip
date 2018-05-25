@@ -16,7 +16,7 @@ const packageName = normalizePackageName(packageJSON.name)
 const LIB_NAME = pascalCase(packageName)
 const PATHS = {
   entryPoint: resolve(__dirname, 'src/public_api.ts'),
-  umd: resolve(__dirname, 'umd'),
+  dist: resolve(__dirname, 'dist'), //umd
   fesm: resolve(__dirname, 'lib-fesm'),
 }
 // https://webpack.js.org/configuration/configuration-types/#exporting-a-function-to-use-env
@@ -124,7 +124,7 @@ const config = (env = DEFAULT_ENV) => {
     // We target a UMD and name it MyLib. When including the bundle in the browser
     // it will be accessible at `window.MyLib`
     output: {
-      path: PATHS.umd,
+      path: PATHS.dist,
       filename: '[name].js',
       libraryTarget: 'umd',
       library: LIB_NAME,
