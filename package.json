@@ -26,7 +26,7 @@
     "test:coverage": "npm test -- --coverage",
     "test:only-changed": "npm test -- --bail --onlyChanged",
     "less:lint": "lesshint --max-warnings=0 \"./src\"",
-    "less:lint:fix": "autolesshint \"./src\"",
+    "less:lint:fix": "autolesshint \"./src\" && npm run less:lint",
     "ts:lint": "tslint --project tsconfig.json --format codeFrame",
     "ts:lint:fix": "npm run ts:lint -- --fix",
     "ts:format:base": "npm run prettier:ts -- {src,__{tests,mocks}__}/**/*.{ts,tsx}",
