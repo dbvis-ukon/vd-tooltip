@@ -7,6 +7,8 @@ const {
   getIfUtils,
   removeEmpty
 } = require('webpack-config-utils')
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const HtmlWebPackPlugin = require("html-webpack-plugin");
 
 const packageJSON = require('./package.json')
 const packageName = normalizePackageName(packageJSON.name)
@@ -55,6 +57,22 @@ const RULES = {
       },
     }, ],
   },
+  css: {
+    test: /\.css$/,
+    include: /src/,
+    use: ExtractTextPlugin.extract({
+      fallback: "style-loader",
+      use: "css-loader"
+    })
+  },
+  less: {
+    test: /\.less$/,
+    include: /src/,
+    use: ExtractTextPlugin.extract({
+      fallback: "style-loader",
+      use: ["css-loader", "less-loader"]
+    })
+  }
 }
 
 const config = (env = DEFAULT_ENV) => {
@@ -86,6 +104,11 @@ const config = (env = DEFAULT_ENV) => {
         NODE_ENV: ifProd('"production"', '"development"')
       },
     }),
+    new ExtractTextPlugin('styles.css'),
+    new HtmlWebPackPlugin({
+      template: "./src/index.html",
+      filename: "./index.html"
+    }),
   ])
 
   const UMDConfig = {
@@ -112,7 +135,7 @@ const config = (env = DEFAULT_ENV) => {
     // Add resolve for `tsx` and `ts` files, otherwise Webpack would
     // only look for common JavaScript file extension (.js)
     resolve: {
-      extensions: ['.ts', '.tsx', '.js'],
+      extensions: ['.ts', '.tsx', '.js', '.less'],
     },
     // add here all 3rd party libraries that you will use as peerDependncies
     // https://webpack.js.org/guides/author-libraries/#add-externals
@@ -122,7 +145,7 @@ const config = (env = DEFAULT_ENV) => {
     devtool: 'source-map',
     plugins: PLUGINS,
     module: {
-      rules: [RULES.ts],
+      rules: [RULES.ts, RULES.less],
     },
   }
 
@@ -135,7 +158,7 @@ const config = (env = DEFAULT_ENV) => {
       filename: UMDConfig.output.filename,
     },
     module: {
-      rules: [RULES.tsNext],
+      rules: [RULES.tsNext, RULES.css, RULES.less],
     },
   })
 
