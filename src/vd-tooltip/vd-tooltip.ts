@@ -1,5 +1,4 @@
-import * as Tether from 'tether'
-
+import Tether from 'tether'
 export class VdTooltip {
   protected container: HTMLElement
   private titleElement: HTMLElement
