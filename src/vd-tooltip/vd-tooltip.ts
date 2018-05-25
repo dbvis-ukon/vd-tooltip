@@ -1,12 +1,11 @@
 import * as Tether from 'tether'
-// import "./vd-tooltip.less";
 
 export class VdTooltip {
   protected container: HTMLElement
   private titleElement: HTMLElement
   private bodyElement: HTMLElement
 
-  private tether!: Tether
+  private tether: Tether | null = null
 
   public constructor(appendElement: HTMLElement) {
     this.container = document.createElement('div')
