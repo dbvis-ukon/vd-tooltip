@@ -1,67 +1,169 @@
-/*jshint esversion: 6 */
+const {
+  resolve
+} = require('path')
+const webpack = require('webpack')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const {
+  getIfUtils,
+  removeEmpty
+} = require('webpack-config-utils')
 
-const path = require('path');
-const HtmlWebPackPlugin = require("html-webpack-plugin");
-const CleanWebpackPlugin = require('clean-webpack-plugin');
-const webpack = require('webpack');
+const packageJSON = require('./package.json')
+const packageName = normalizePackageName(packageJSON.name)
 
-module.exports = {
-  mode: "development",
-  devtool: "inline-source-map",
-  entry: {
-    index: './src/index.ts',
-    main: './src/main.ts'
-  },
-  output: {
-    filename: '[name].js',
-    path: path.resolve(__dirname, 'dist')
-  },
-  optimization: {
-    splitChunks: {
-      chunks: 'all'
-    }
-  },
-  resolve: {
-    // Add `.ts` and `.tsx` as a resolvable extension.
-    extensions: [".ts", ".tsx", ".js", ".css", ".less", ".scss"]
-  },
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        enforce: 'pre',
-        loader: 'tslint-loader',
-        options: { /* Loader options go here */
-          failOnHint: false
-        },
-        exclude: /^(?!.*\.spec\.ts$).*\.ts$/
-      },
-      // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
-      { test: /\.tsx?$/, loader: "ts-loader" },
+const LIB_NAME = pascalCase(packageName)
+const PATHS = {
+  entryPoint: resolve(__dirname, 'src/index.ts'),
+  umd: resolve(__dirname, 'umd'),
+  fesm: resolve(__dirname, 'lib-fesm'),
+}
+// https://webpack.js.org/configuration/configuration-types/#exporting-a-function-to-use-env
+// this is equal to 'webpack --env=dev'
+const DEFAULT_ENV = 'dev'
 
-      { test: /\.css$/, loaders: ['style-loader', 'css-loader'] },
+const EXTERNALS = {
+  // lodash: {
+  //   commonjs: "lodash",
+  //   commonjs2: "lodash",
+  //   amd: "lodash",
+  //   root: "_"
+  // }
+}
 
-      { test: /\.less$/, loaders: ['style-loader', 'css-loader', 'less-loader'] }
-    ]
-  },
-  plugins: [
-    new CleanWebpackPlugin(['dist']),
-    new HtmlWebPackPlugin({
-      template: "./src/index.html",
-      filename: "./index.html"
-    }),
-    new webpack.LoaderOptionsPlugin({
+const RULES = {
+  ts: {
+    test: /\.tsx?$/,
+    include: /src/,
+    use: [{
+      loader: 'awesome-typescript-loader',
       options: {
-          tslint: {
-              //emitErrors: true,
-              failOnHint: false
+        // we don't want any declaration file in the bundles
+        // folder since it wouldn't be of any use ans the source
+        // map already include everything for debugging
+        // This cannot be set because -> Option 'declarationDir' cannot be specified without specifying option 'declaration'.
+        // declaration: false,
+      },
+    }, ],
+  },
+  tsNext: {
+    test: /\.tsx?$/,
+    include: /src/,
+    use: [{
+      loader: 'awesome-typescript-loader',
+      options: {
+        target: 'es2017',
+      },
+    }, ],
+  },
+}
+
+const config = (env = DEFAULT_ENV) => {
+  const {
+    ifProd,
+    ifNotProd
+  } = getIfUtils(env)
+  const PLUGINS = removeEmpty([
+    // enable scope hoisting
+    new webpack.optimize.ModuleConcatenationPlugin(),
+    // Apply minification only on the second bundle by using a RegEx on the name, which must end with `.min.js`
+    ifProd(
+      new UglifyJsPlugin({
+        sourceMap: true,
+        uglifyOptions: {
+          compress: {
+            warnings: false,
           }
-      }
-  })
-  ],
-  devServer: {
-    contentBase: path.join(__dirname, "dist"),
-    compress: true,
-    port: 9000
+        },
+        extractComments: false
+      })
+    ),
+    new webpack.LoaderOptionsPlugin({
+      debug: false,
+      minimize: true,
+    }),
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: ifProd('"production"', '"development"')
+      },
+    }),
+  ])
+
+  const UMDConfig = {
+    // These are the entry point of our library. We tell webpack to use
+    // the name we assign later, when creating the bundle. We also use
+    // the name to filter the second entry point for applying code
+    // minification via UglifyJS
+    entry: {
+      [ifProd(`${packageName}.min`, packageName)]: [PATHS.entryPoint],
+    },
+    // The output defines how and where we want the bundles. The special
+    // value `[name]` in `filename` tell Webpack to use the name we defined above.
+    // We target a UMD and name it MyLib. When including the bundle in the browser
+    // it will be accessible at `window.MyLib`
+    output: {
+      path: PATHS.umd,
+      filename: '[name].js',
+      libraryTarget: 'umd',
+      library: LIB_NAME,
+      // libraryExport:  LIB_NAME,
+      // will name the AMD module of the UMD build. Otherwise an anonymous define is used.
+      umdNamedDefine: true,
+    },
+    // Add resolve for `tsx` and `ts` files, otherwise Webpack would
+    // only look for common JavaScript file extension (.js)
+    resolve: {
+      extensions: ['.ts', '.tsx', '.js'],
+    },
+    // add here all 3rd party libraries that you will use as peerDependncies
+    // https://webpack.js.org/guides/author-libraries/#add-externals
+    externals: EXTERNALS,
+    // Activate source maps for the bundles in order to preserve the original
+    // source when the user debugs the application
+    devtool: 'source-map',
+    plugins: PLUGINS,
+    module: {
+      rules: [RULES.ts],
+    },
   }
-};
+
+  const FESMconfig = Object.assign({}, UMDConfig, {
+    entry: {
+      [ifProd('index.min', 'index')]: [PATHS.entryPoint],
+    },
+    output: {
+      path: PATHS.fesm,
+      filename: UMDConfig.output.filename,
+    },
+    module: {
+      rules: [RULES.tsNext],
+    },
+  })
+
+  return [UMDConfig, FESMconfig]
+}
+
+module.exports = config
+
+// helpers
+
+function camelCaseToDash(myStr) {
+  return myStr.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+}
+
+function dashToCamelCase(myStr) {
+  return myStr.replace(/-([a-z])/g, g => g[1].toUpperCase())
+}
+
+function toUpperCase(myStr) {
+  return `${myStr.charAt(0).toUpperCase()}${myStr.substr(1)}`
+}
+
+function pascalCase(myStr) {
+  return toUpperCase(dashToCamelCase(myStr))
+}
+
+function normalizePackageName(rawPackageName) {
+  const scopeEnd = rawPackageName.indexOf('/') + 1
+
+  return rawPackageName.substring(scopeEnd)
+}
