@@ -1,27 +1,28 @@
-const {
-  resolve
-} = require('path')
-const webpack = require('webpack')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+/*jshint esversion: 6 */
+
+const {resolve} = require('path');
+const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const {
   getIfUtils,
   removeEmpty
-} = require('webpack-config-utils')
+} = require('webpack-config-utils');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 
-const packageJSON = require('./package.json')
-const packageName = normalizePackageName(packageJSON.name)
+const packageJSON = require('./package.json');
+const packageName = normalizePackageName(packageJSON.name);
 
-const LIB_NAME = pascalCase(packageName)
+const LIB_NAME = pascalCase(packageName);
 const PATHS = {
   entryPoint: resolve(__dirname, 'src/public_api.ts'),
+  entryPointCss: resolve(__dirname, 'src/styles.less'),
   dist: resolve(__dirname, 'dist'), //umd
-  fesm: resolve(__dirname, 'lib-fesm'),
-}
+  fesm: resolve(__dirname, 'lib-fesm')
+};
 // https://webpack.js.org/configuration/configuration-types/#exporting-a-function-to-use-env
 // this is equal to 'webpack --env=dev'
-const DEFAULT_ENV = 'dev'
+const DEFAULT_ENV = 'dev';
 
 const EXTERNALS = {
   // lodash: {
@@ -30,7 +31,7 @@ const EXTERNALS = {
   //   amd: "lodash",
   //   root: "_"
   // }
-}
+};
 
 const RULES = {
   ts: {
@@ -73,13 +74,13 @@ const RULES = {
       use: ["css-loader", "less-loader"]
     })
   }
-}
+};
 
 const config = (env = DEFAULT_ENV) => {
   const {
     ifProd,
     ifNotProd
-  } = getIfUtils(env)
+  } = getIfUtils(env);
   const PLUGINS = removeEmpty([
     // enable scope hoisting
     new webpack.optimize.ModuleConcatenationPlugin(),
@@ -104,12 +105,12 @@ const config = (env = DEFAULT_ENV) => {
         NODE_ENV: ifProd('"production"', '"development"')
       },
     }),
-    new ExtractTextPlugin('styles.css'),
+    new ExtractTextPlugin('[name].min.css'),
     new HtmlWebPackPlugin({
       template: "./src/index.html",
       filename: "./index.html"
     }),
-  ])
+  ]);
 
   const UMDConfig = {
     // These are the entry point of our library. We tell webpack to use
@@ -118,6 +119,7 @@ const config = (env = DEFAULT_ENV) => {
     // minification via UglifyJS
     entry: {
       [ifProd(`${packageName}.min`, packageName)]: [PATHS.entryPoint],
+      styles: [PATHS.entryPointCss]
     },
     // The output defines how and where we want the bundles. The special
     // value `[name]` in `filename` tell Webpack to use the name we defined above.
@@ -147,11 +149,12 @@ const config = (env = DEFAULT_ENV) => {
     module: {
       rules: [RULES.ts, RULES.less],
     },
-  }
+  };
 
   const FESMconfig = Object.assign({}, UMDConfig, {
     entry: {
       [ifProd('public_api.min', 'public_api')]: [PATHS.entryPoint],
+      styles: [PATHS.entryPointCss]
     },
     output: {
       path: PATHS.fesm,
@@ -160,33 +163,33 @@ const config = (env = DEFAULT_ENV) => {
     module: {
       rules: [RULES.tsNext, RULES.css, RULES.less],
     },
-  })
+  });
 
-  return [UMDConfig, FESMconfig]
-}
+  return [UMDConfig, FESMconfig];
+};
 
-module.exports = config
+module.exports = config;
 
 // helpers
 
 function camelCaseToDash(myStr) {
-  return myStr.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+  return myStr.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
 function dashToCamelCase(myStr) {
-  return myStr.replace(/-([a-z])/g, g => g[1].toUpperCase())
+  return myStr.replace(/-([a-z])/g, g => g[1].toUpperCase());
 }
 
 function toUpperCase(myStr) {
-  return `${myStr.charAt(0).toUpperCase()}${myStr.substr(1)}`
+  return `${myStr.charAt(0).toUpperCase()}${myStr.substr(1)}`;
 }
 
 function pascalCase(myStr) {
-  return toUpperCase(dashToCamelCase(myStr))
+  return toUpperCase(dashToCamelCase(myStr));
 }
 
 function normalizePackageName(rawPackageName) {
-  const scopeEnd = rawPackageName.indexOf('/') + 1
+  const scopeEnd = rawPackageName.indexOf('/') + 1;
 
-  return rawPackageName.substring(scopeEnd)
+  return rawPackageName.substring(scopeEnd);
 }
