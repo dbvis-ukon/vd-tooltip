@@ -1,7 +1,6 @@
 # VdTooltip
 
-
-The library template is adapted from https://github.com/wjentner/typescript-lib-starter
+The library template is adapted from `https://github.com/wjentner/typescript-lib-starter`
 
 - creates package for both Node and Browser
 - build creates 3 standard "bundle" formats:
@@ -11,7 +10,7 @@ The library template is adapted from https://github.com/wjentner/typescript-lib-
 - also we provide experimantal **FESM** bundle thanks to Webpack 3 and scope hoisting -> you can find it in `lib-fesm` folder ( scope hoisting is now enabled also within UMD == smaller payload size )
 - type definitions are automatically generated and shipped with your package
 
-## Start coding jedi!
+## Start coding jedi
 
 `git clone git@github.com:dbvis-ukon/vd-tooltip.git`
 
@@ -23,7 +22,7 @@ Now install all dependencies
 
 Happy coding !
 
-## Consumption of published library:
+## Consumption of published library
 
 `yarn add @dbvis/vd-tooltip` or `npm install @dbvis/vd-tooltip`
 
@@ -53,5 +52,6 @@ Please note that if you wanna use that feature, compiler will complain because d
 can't handle type generation with types that will be loaded in the future ( lazily )
 
 How to solve this:
+
 - turn of type checking and don't generate types for that lazy import: `import('./components/button') as any`
 - or you can use this [temporary workaround](https://github.com/Microsoft/TypeScript/issues/16603#issuecomment-310208259)
