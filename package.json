@@ -2,48 +2,141 @@
   "name": "@dbvis/vd-tooltip",
   "version": "0.0.1",
   "description": "A simple tooltip based on tether",
-  "main": "dist/main.js",
-  "types": "dist/main.d.ts",
-  "scripts": {
-    "start": "webpack-dev-server --mode development --open",
-    "test": "cross-env TS_NODE_COMPILER_OPTIONS='{\\\"module\\\":\\\"commonjs\\\"}' mocha -r ts-node/register -r ignore-styles -r jsdom-global/register src/**/*.spec.ts",
-    "fixlint": "tslint -p ./ --fix",
-    "lint": "tslint -p ./"
-  },
-  "repository" : { 
-    "type" : "git", 
-    "url" : "git@github.com:dbvis-ukon/vd-tooltip.git"
+  "main": "dist/vd-tooltip.js",
+  "module": "lib/public_api.js",
+  "es2015": "lib-esm/public_api.js",
+  "types": "@types/public_api.d.ts",
+  "style": "dist/styles.min.css",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:dbvis-ukon/vd-tooltip.git"
   },
   "author": "Wolfgang Jentner <wolfgang.jentner@uni.kn>",
   "license": "MIT",
+  "engines": {
+    "node": ">=6.9"
+  },
+  "scripts": {
+    "cleanup": "shx rm -rf dist lib lib-esm lib-fesm @types coverage docs",
+    "prebuild": "npm run cleanup && npm run verify",
+    "build": " tsc && tsc --target es2017 --outDir lib-esm && webpack && webpack --env.prod",
+    "build:fesm:min": "uglifyjs lib-fesm/public_api.js --compress --mangle --source-map --output lib-fesm/public_api.min.js",
+    "docs": "typedoc -p . --theme minimal --target 'es6' --excludeNotExported --excludePrivate --ignoreCompilerErrors --exclude \"**/src/**/__tests__/*.*\" --out docs src/",
+    "test": "jest",
+    "test:watch": "npm test -- --watch",
+    "test:coverage": "npm test -- --coverage",
+    "test:only-changed": "npm test -- --bail --onlyChanged",
+    "less:lint": "lesshint --max-warnings=0 \"./src\"",
+    "less:lint:fix": "autolesshint \"./src\" && npm run less:lint",
+    "ts:lint": "tslint --project tsconfig.json --format codeFrame",
+    "ts:lint:fix": "npm run ts:lint -- --fix",
+    "ts:format:base": "npm run prettier:ts -- {src,__{tests,mocks}__}/**/*.{ts,tsx}",
+    "ts:format": "npm run ts:format:base -- --list-different",
+    "ts:format:fix": "npm run ts:format:base -- --write",
+    "ts:style": "npm run ts:format && npm run ts:lint",
+    "ts:style:fix": "npm run ts:format:fix && npm run ts:lint:fix",
+    "verify": "npm run ts:style && npm run less:lint && npm test",
+    "cz": "git-cz",
+    "prettier:ts": "prettier --single-quote --print-width 120 --trailing-comma es5 --no-semi --parser typescript",
+    "precommit": "lint-staged",
+    "commitmsg": "commitlint -x @commitlint/config-conventional -e $GIT_PARAMS",
+    "prepush": "npm run ts:style && npm run less:lint && npm run test:only-changed",
+    "prerelease": "npm run build",
+    "release": "standard-version",
+    "postrelease": "npm run release:github && npm run release:npm",
+    "release:github": "git push --no-verify --follow-tags origin master",
+    "release:npm": "npm publish",
+    "release:preflight": "irish-pub",
+    "release:preflight:package": "npm pack",
+    "size": "shx echo \"Gzipped Size:\" && cross-var strip-json-comments --no-whitespace $npm_package_main | gzip-size"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    },
+    "validate-commit-msg": {
+      "types": "conventional-commit-types",
+      "maxSubjectLength": 120
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "npm run prettier:ts -- --write",
+      "npm run ts:lint:fix",
+      "git add"
+    ],
+    "src/**/*.{less}": [
+      "npm run less:lint:fix"
+    ]
+  },
+  "jest": {
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/lib/",
+      "<rootDir>/lib-esm/",
+      "<rootDir>/dist/",
+      "<rootDir>/src/.*(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 85
+      }
+    }
+  },
   "dependencies": {
     "@types/tether": "^1.4.3",
     "tether": "^1.4.4"
   },
   "devDependencies": {
-    "@types/chai": "^4.1.3",
-    "@types/mocha": "^5.2.0",
-    "chai": "^4.1.2",
-    "chai-dom": "^1.8.0",
-    "clean-webpack-plugin": "^0.1.19",
-    "cross-env": "^5.1.6",
-    "css-loader": "^0.28.11",
-    "html-loader": "^0.5.5",
-    "html-webpack-plugin": "^3.0.6",
-    "ignore-styles": "^5.0.1",
-    "jsdom": "^11.11.0",
-    "jsdom-global": "^3.0.2",
-    "less": "^3.0.1",
-    "less-loader": "^4.1.0",
-    "mocha": "^5.2.0",
-    "style-loader": "^0.20.3",
-    "ts-loader": "^4.0.1",
-    "ts-node": "^6.0.3",
+    "@commitlint/cli": "6.2.0",
+    "@commitlint/config-conventional": "6.1.3",
+    "@types/jest": "~22.2.3",
+    "autolesshint": "0.2.1",
+    "awesome-typescript-loader": "^4.0.0",
+    "commitizen": "^2.9.6",
+    "copyfiles": "2.0.0",
+    "cross-var": "^1.1.0",
+    "css-loader": "0.28.11",
+    "cz-conventional-changelog": "^2.0.0",
+    "extract-text-webpack-plugin": "3.0.2",
+    "gzip-size-cli": "^2.0.0",
+    "html-webpack-plugin": "3.2.0",
+    "husky": "^0.14.1",
+    "irish-pub": "0.2.0",
+    "jest": "~22.4.0",
+    "less": "3.0.4",
+    "less-loader": "4.1.0",
+    "lesshint": "5.1.0",
+    "lint-staged": "^7.0.0",
+    "prettier": "^1.12.1",
+    "shx": "0.2.2",
+    "standard-version": "^4.4.0",
+    "strip-json-comments-cli": "1.0.1",
+    "style-loader": "0.21.0",
+    "ts-jest": "~22.4.6",
     "tslint": "^5.10.0",
-    "tslint-loader": "^3.6.0",
+    "tslint-config-prettier": "^1.13.0",
+    "tslint-config-standard": "^7.0.0",
+    "tslint-react": "^3.6.0",
+    "typedoc": "^0.11.1",
     "typescript": "^2.8.3",
-    "webpack": "^4.8.3",
-    "webpack-cli": "^2.1.4",
-    "webpack-dev-server": "^3.1.1"
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "webpack": "^3.12.0",
+    "webpack-config-utils": "2.3.0"
   }
 }
