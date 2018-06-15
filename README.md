@@ -5,7 +5,7 @@ A simple library to attach a tooltip to elements. The attachment is handled by t
 Sample usage:
 
 ```javascript
-import { VdTooltip } from './vd-tooltip/vd-tooltip'
+import { VdTooltip } from '@dbvis/vd-tooltip';
 
 //add the tooltip to the body
 const tooltip = new VdTooltip(document.body)
