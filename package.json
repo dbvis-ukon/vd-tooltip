@@ -1,6 +1,6 @@
 {
   "name": "@dbvis/vd-tooltip",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A simple tooltip based on tether",
   "main": "dist/vd-tooltip.js",
   "module": "lib/public_api.js",
