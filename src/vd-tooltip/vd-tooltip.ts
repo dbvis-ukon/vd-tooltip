@@ -1,4 +1,7 @@
 import Tether from 'tether'
+/**
+ * A simple class to display a tooltip anywhere in your app.
+ */
 export class VdTooltip {
   protected container: HTMLElement
   private titleElement: HTMLElement
@@ -6,6 +9,10 @@ export class VdTooltip {
 
   private tether: Tether | null = null
 
+  /**
+   * Creates a new tooltip element.
+   * @param appendElement the html element where the tooltip will be added to
+   */
   public constructor(appendElement: HTMLElement) {
     this.container = document.createElement('div')
     this.container.classList.add('vd-tooltip', 'hidden')
@@ -25,6 +32,10 @@ export class VdTooltip {
     })
   }
 
+  /**
+   * Hide the tooltip.
+   * @returns {VdTooltip} this instance
+   */
   public hide(): VdTooltip {
     if (this.container) {
       this.container.classList.add('hidden')
@@ -36,6 +47,11 @@ export class VdTooltip {
     return this
   }
 
+  /**
+   * Shows the tooltip and attaches it to the target element.
+   * @param target the target where the tooltip will be attached to
+   * @returns {VdTooltip} this instance
+   */
   public show(target: HTMLElement): VdTooltip {
     // const obj: $ = $(target);
 
@@ -57,6 +73,12 @@ export class VdTooltip {
     return this
   }
 
+  /**
+   *
+   * @param header the header content
+   * @param body the body content
+   * @returns {VdTooltip} this instance
+   */
   public setContent(header: string, body: string): VdTooltip {
     this.titleElement.innerHTML = header
     this.bodyElement.innerHTML = body
