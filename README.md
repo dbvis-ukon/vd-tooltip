@@ -1,5 +1,7 @@
 # VdTooltip
 
+[![npm version](https://badge.fury.io/js/%40dbvis%2Fvd-tooltip.svg)](https://badge.fury.io/js/%40dbvis%2Fvd-tooltip)
+
 A simple library to attach a tooltip to elements. The attachment is handled by the awesome tether library.
 
 Sample usage:
